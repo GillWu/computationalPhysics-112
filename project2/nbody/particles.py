@@ -78,7 +78,7 @@ class Particles:
             raise ValueError
         self._accelerations = some_a
 
-    def add_particles(self,masses, positions, velocities, accelerations):
+    def add_particles(self, masses, positions, velocities, accelerations):
         M      = self._masses
         X      = self._positions
         V      = self._velocities
@@ -90,6 +90,13 @@ class Particles:
         self._positions = np.concatenate((X , positions),axis=0)
         self._velocities = np.concatenate((V, velocities),axis=0)
         self._accelerations = np.concatenate((A, accelerations),axis=0)
+        return
+    
+    def set_particles(self, masses, positions, velocities, accelerations):
+        self._masses = masses
+        self._positions = positions
+        self._velocities = velocities
+        self._accelerations = accelerations
         return
     
     def output(self,filename):

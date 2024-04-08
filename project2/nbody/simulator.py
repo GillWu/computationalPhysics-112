@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
-from .particles import Particles
+from .particles import Particles 
 from numba import jit, njit, prange, set_num_threads
 
 """
@@ -14,10 +14,12 @@ The N-Body Simulator class is responsible for simulating the motion of N bodies
 class NBodySimulator:
 
     def __init__(self, particles: Particles):
-        
-        # TODO
 
-
+        # set up the properties of the particles
+        self.particles = particles
+        self.time      = particles.time
+        # call defult settings in setup()
+        self.setup()
         return
 
     def setup(self, G=1,
@@ -41,9 +43,24 @@ class NBodySimulator:
         :param io_screen: print message on screen or not.
         :param visualization: on the fly visualization or not. 
         """
+        self.G = G
+        self.rsoft = rsoft
+        self.method = method
+        self.io_freq = io_freq
+        self.io_header = io_header
+        self.io_screen = io_screen
+        self.visualization = visualization
         
-        # TODO
-
+        # set up the advance_particles method
+        if method.lower() == "Euler":
+            self._advance_particles = self._advance_particles_Euler
+        elif method.lower() == "RK2":
+            self._advance_particles = self._advance_particles_RK2
+        elif method.lower() == "RK4":
+            self._advance_particles = self._advance_particles_RK4
+        else:
+            print("Please enter the method (Euler, RK2, RK4)")
+            return
 
         return
 
@@ -55,16 +72,29 @@ class NBodySimulator:
         :param tmax: float, the total time to evolve
         
         """
+        time = self.particles.time
+        tsteps = np.ceil(tmax/dt)
 
-        # TODO
+        for n in range(tsteps):
 
+            # make sure the last step will arrive at tmax
+            if (time+dt) > tmax:
+                dt = tmax - time
 
+            # complicate physics model
+            particles = self._advance_particles(dt, particles)
 
+            # Output
+            # output is not ready in particles.py
+            #if (n % self.io_freq == 0):
+            #    if self.io_screen:
+            #        print("n=",n , "Time: ", time, " dt: ", dt)
+            #    fn = self.io_header+"_"+str(n).zfill(6)+".dat"
+            #    fn = io_folder+"/"+fn
+            #    particles.output(fn)
 
-
-
-
-
+            #update the time
+            time += dt
 
         print("Simulation is done!")
         return
@@ -76,7 +106,7 @@ class NBodySimulator:
         accelerations = np.zeros_like(positions)
         
 
-        # TODO
+        
 
 
 
@@ -84,14 +114,18 @@ class NBodySimulator:
         return accelerations
         
     def _advance_particles_Euler(self, dt, particles):
+        nparticles = particles.nparticles
+        mass = particles.masses
+        pos = particles.positions
+        vel = particles.velocities
+        acc = self._calculate_acceleration(nparticles, mass, pos)
 
-        #TODO
+        # do the Euler update
+        pos = pos + vel*dt
+        vel = vel + acc*dt
+        acc = self._calculate_acceleration(nparticles, mass, pos)
 
-
-
-
-
-
+        particles = particles.set_particles(mass, pos, vel, acc)
 
         return particles
 
