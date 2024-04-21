@@ -99,25 +99,37 @@ class Particles:
         self._accelerations = accelerations
         return
     
-    def output(self,filename):
+    def output(self, filename):
         """
-        This function is not finished yet.
-        It will writes down the properties of particles in a txt file.
-        """
-        # 將所有數組轉換為字符串
-        tags = np.array(self.tags, dtype=str).reshape(-1, 1)
-        masses = np.array(self.masses, dtype=str).reshape(-1, 1)
-        pos = np.array(self.positions, dtype=str).reshape(-1, 1)
-        vel = np.array(self.velocities, dtype=str).reshape(-1, 1)
-        acc = np.array(self.accelerations, dtype=str).reshape(-1, 1)
+        Output particle properties to a file
 
-        header = "# time,tag,mass,x,y,z,vx,vy,vz,ax,ay,az\n"
-        header+= "# s,,kg,m,m,m,m/s,m/s,m/s,m/s^2,m/s^2,m/s^2\n"
-        # 儲存數組
-        np.savetxt(filename, np.hstack((np.ones((self.nparticles,1))*self.time, 
-                                             tags, masses, pos, vel, acc)), 
-                                             fmt='%s', header=header)
+        :param filename: output file name
+        """
+        masses = self.masses
+        pos = self.positions
+        vel = self.velocities
+        acc = self.accelerations
+        tags = self.tags
+        time = self.time
+
+        header = """
+                ----------------------------------------------------
+                Data from a 3D direct N-body simulation. 
+
+                rows are i-particle; 
+                coumns are :mass, tag, x ,y, z, vx, vy, vz, ax, ay, az
+
+                NTHU, Computational Physics 
+
+                ----------------------------------------------------
+                """
+        header += "Time = {}".format(time)
+        np.savetxt(filename,(tags[:],masses[:,0],pos[:,0],pos[:,1],pos[:,2],
+                            vel[:,0],vel[:,1],vel[:,2],
+                            acc[:,0],acc[:,1],acc[:,2]),header=header)
         return
+
+
     
     def draw(self, dim=2):
         """
@@ -142,6 +154,12 @@ class Particles:
             return
 
 if __name__ =='__main__':
-    num_particles = 100
+    time          = 0    # the starting  time
+    num_particles = 100  # number of particles
     masses        = np.ones((num_particles,1))
-    print(len(masses))
+    positions     = np.zeros((num_particles,3)) # 3 directions
+    velocities    = np.zeros((num_particles,3))
+    accelerations = np.zeros((num_particles,3))
+    tags          = np.linspace(1,num_particles,num_particles)
+    particles = Particles(N=num_particles)
+    particles.output(filename='data.txt')
