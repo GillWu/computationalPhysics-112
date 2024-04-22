@@ -100,34 +100,25 @@ class Particles:
         return
     
     def output(self, filename):
-        """
-        Output particle properties to a file
+        # 將所有數組轉換為字符串
+        time = str(self.time)
+        tags = [str(tag) for tag in self.tags]
+        masses = [f"{mass:.1f}" for mass in self.masses.flatten()]
+        pos = [f"{p:.1f}" for p in self.positions.flatten()]
+        vel = [f"{v:.1f}" for v in self.velocities.flatten()]
+        acc = [f"{a:.1f}" for a in self.accelerations.flatten()]
+    
+        # 構建數據列表
+        data = [['time[s]', 'tag', 'mass[kg]', 'x[m]', 'y[m]', 'z[m]', 'vx[m/s]', 'vy[m/s]', 'vz[m/s]', 'ax[m/s^2]', 'ay[m/s^2]', 'az[m/s^2]']]
+        for i in range(len(tags)):
+            data.append([time, tags[i], masses[i], *pos[i*3:i*3+3], *vel[i*3:i*3+3], *acc[i*3:i*3+3]])
+    
+        # 保存數據到文本文件
+        with open(filename, 'w') as f:
+            for row in data:
+                formatted_row = [value.rjust(10) for value in row]
+                f.write(','.join(formatted_row) + '\n')
 
-        :param filename: output file name
-        """
-        masses = self.masses
-        pos = self.positions
-        vel = self.velocities
-        acc = self.accelerations
-        tags = self.tags
-        time = self.time
-
-        header = """
-                ----------------------------------------------------
-                Data from a 3D direct N-body simulation. 
-
-                rows are i-particle; 
-                coumns are :mass, tag, x ,y, z, vx, vy, vz, ax, ay, az
-
-                NTHU, Computational Physics 
-
-                ----------------------------------------------------
-                """
-        header += "Time = {}".format(time)
-        np.savetxt(filename,(tags[:],masses[:,0],pos[:,0],pos[:,1],pos[:,2],
-                            vel[:,0],vel[:,1],vel[:,2],
-                            acc[:,0],acc[:,1],acc[:,2]),header=header)
-        return
 
 
     
