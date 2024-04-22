@@ -39,7 +39,8 @@ def save_movie(fns, lengthscale=1.0, filename='movie.mp4',fps=30):
 
     def update(frame):
         fn = fns[frame]
-        m,t,x,y,z,vx,vy,vz,ax,ay,az = np.loadtxt(fn)
+        # Skip the first row (header) and only load the columns you need
+        m,t,x,y,z,vx,vy,vz,ax,ay,az= np.loadtxt(fn, skiprows=1, usecols=(0, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11))
         line.set_data(x, y)
         plt.title("Frame ="+str(frame),size=18)
         return line,
