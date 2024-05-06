@@ -39,7 +39,9 @@ def save_movie(fns, lengthscale=1.0, filename='movie.mp4',fps=30):
 
     def update(frame):
         fn = fns[frame]
-        m,t,x,y,z,vx,vy,vz,ax,ay,az = np.loadtxt(fn)
+        # use np.genfromtxt toswith my data from strings to floats
+        data = np.genfromtxt(fn, delimiter=',', skip_header=1, dtype=float)
+        t,m,tag,x,y,z,vx,vy,vz,ax,ay,az = data.T
         line.set_data(x, y)
         plt.title("Frame ="+str(frame),size=18)
         return line,
