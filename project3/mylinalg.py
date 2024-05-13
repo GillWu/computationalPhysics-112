@@ -21,8 +21,16 @@ def solveLowerTriangular(L,b):
     """
     n  = len(b)
     x  = np.zeros(n)
+    bs = np.copy(b) # backup of b
 
-    # TODO
+    #  can be numba kernel
+    for j in np.arange(n):
+        if L[j,j] == 0:
+            raise ValueError("Matrix is singular.")
+        x[j] = bs[j]/L[j,j]
+
+        for i in np.arange(j+1,n):
+            bs[i] -= L[i,j]*x[j]
     
     return x
 
@@ -41,8 +49,16 @@ def solveUpperTriangular(U,b):
     """
     n  = len(b)
     x  = np.zeros(n)
- 
-    # TODO
+    bs = np.copy(b) # backup of b
+
+    #  can be numba kernel
+    for j in np.arange(n-1,-1,-1):
+        if U[j,j] == 0:
+            raise ValueError("Matrix is singular.")
+        x[j] = bs[j]/U[j,j]
+
+        for i in np.arange(j):
+            bs[i] -= U[i,j]*x[j]
     
     return x
 
@@ -60,11 +76,26 @@ def lu(A):
 
     """
     n  = len(A)
-    L  = np.zeros((n,n))
+    L  = np.identity(n)
     U  = np.zeros((n,n))
+    M  = np.zeros((n,n))
+    As = np.copy(A) # backup of A 
 
-    # TODO
+    for k in np.arange(n):
+        if As[k,k]==0:
+            raise ValueError("Matrix is singular.")
+        for i in np.arange(k+1,n):
+            M[i,k] = As[i,k]/As[k,k]
     
+        for j in np.arange(k+1,n):
+            for i in np.arange(k+1,n):
+                As[i,j] -= M[i,k]*As[k,j]
+
+    # compute L and U
+    for i in np.arange(n):
+        L[i,:i] = M[i,:i]
+        U[i,i:] = As[i,i:]
+
     return L, U
 
 
@@ -82,8 +113,11 @@ def lu_solve(A,b):
     """
 
     x = np.zeros(len(b))
+    l, u = lu(A)
+    # L(U x) = b; U x = y
+    # L y = b
+    y = solveLowerTriangular(l,b)
 
-    # TODO
-
-
+    # y = U x
+    x = solveUpperTriangular(u,y)
     return x
